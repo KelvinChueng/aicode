@@ -4,38 +4,104 @@ ui.add_head_html(
     '''
 <style>
     body {
-        background: radial-gradient(circle at 20% 20%, #1a2a6c 0%, #0b1020 45%, #05070f 100%);
-        color: #e6f1ff;
+        margin: 0;
+        background: #f7f7f8;
+        color: #1f2937;
+        font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif;
     }
-    .glass-panel {
-        background: linear-gradient(135deg, rgba(20, 30, 60, 0.82), rgba(8, 14, 30, 0.72));
-        border: 1px solid rgba(97, 218, 251, 0.30);
-        box-shadow: 0 0 24px rgba(97, 218, 251, 0.15), inset 0 0 24px rgba(97, 218, 251, 0.08);
-        border-radius: 18px;
-        backdrop-filter: blur(8px);
+    .app-shell {
+        min-height: 100vh;
+        width: 100%;
+        gap: 0;
     }
-    .neon-link {
-        color: #79d7ff !important;
-        text-decoration: none;
+    .sidebar {
+        width: 240px;
+        min-height: 100vh;
+        background: #efeff1;
+        border-right: 1px solid #e1e3e7;
+        padding: 14px 10px;
+        gap: 8px;
+    }
+    .brand {
+        font-size: 18px;
         font-weight: 700;
-        padding: 10px 16px;
-        border-radius: 12px;
-        border: 1px solid rgba(121, 215, 255, 0.25);
-        transition: all .2s ease;
-        background: rgba(121, 215, 255, 0.06);
+        color: #111827;
+        padding: 8px 10px 14px 10px;
     }
-    .neon-link:hover {
-        color: #b6ecff !important;
-        box-shadow: 0 0 14px rgba(121, 215, 255, 0.55);
-        transform: translateY(-1px);
-        background: rgba(121, 215, 255, 0.14);
+    .nav-link {
+        display: block;
+        text-decoration: none;
+        color: #1f2937 !important;
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 500;
+        transition: background .2s ease;
     }
-    .page-title {
-        color: #c4eeff;
-        text-shadow: 0 0 12px rgba(106, 214, 255, 0.55);
+    .nav-link:hover {
+        background: #e5e7eb;
     }
-    .muted {
-        color: #9eb7cf;
+    .nav-link.active {
+        background: #e5e7eb;
+        font-weight: 700;
+    }
+    .main {
+        flex: 1;
+        min-height: 100vh;
+        padding: 18px 24px;
+        background: #f7f7f8;
+    }
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 120px;
+    }
+    .top-title {
+        font-size: 30px;
+        font-weight: 700;
+    }
+    .page-center {
+        width: 100%;
+        max-width: 820px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 26px;
+    }
+    .hero-title {
+        font-size: 44px;
+        font-weight: 700;
+        color: #111827;
+    }
+    .hero-desc {
+        font-size: 16px;
+        color: #6b7280;
+        margin-top: -12px;
+    }
+    .prompt-box {
+        width: 100%;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 28px;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    }
+    .prompt-left {
+        color: #9ca3af;
+        font-size: 16px;
+    }
+    .pill {
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 600;
     }
 </style>
 ''',
@@ -43,39 +109,51 @@ ui.add_head_html(
 )
 
 
-def render_shell(title: str, desc: str) -> None:
-    with ui.column().classes('w-full min-h-screen p-6 md:p-10 gap-6'):
-        ui.label('AI绘图控制台').classes('text-3xl font-black tracking-wide page-title')
+def render_layout(active_path: str, title: str, description: str) -> None:
+    with ui.row().classes('app-shell'):
+        with ui.column().classes('sidebar'):
+            ui.label('AI绘图').classes('brand')
+            links = [
+                ('首页', '/'),
+                ('图片管理', '/images'),
+                ('工作流编辑页面', '/workflow'),
+                ('设置页面', '/settings'),
+            ]
+            for text, path in links:
+                classes = 'nav-link active' if path == active_path else 'nav-link'
+                ui.link(text, path).classes(classes)
 
-        with ui.row().classes('glass-panel w-full items-center gap-3 p-3 md:p-4'):
-            ui.link('首页', '/').classes('neon-link')
-            ui.link('图片管理', '/images').classes('neon-link')
-            ui.link('工作流编辑页面', '/workflow').classes('neon-link')
-            ui.link('设置页面', '/settings').classes('neon-link')
+        with ui.column().classes('main'):
+            with ui.row().classes('topbar w-full'):
+                ui.label(title).classes('top-title')
+                ui.label('AI绘图 Plus').classes('pill')
 
-        with ui.column().classes('glass-panel w-full p-6 md:p-8 gap-4'):
-            ui.label(title).classes('text-3xl font-bold page-title')
-            ui.label(desc).classes('text-lg muted')
+            with ui.column().classes('page-center'):
+                ui.label('今天想创作什么？').classes('hero-title')
+                ui.label(description).classes('hero-desc')
+                with ui.row().classes('prompt-box'):
+                    ui.label('＋ 输入你的需求，例如：赛博朋克城市夜景').classes('prompt-left')
+                    ui.label('开始').classes('pill')
 
 
 @ui.page('/')
 def home_page() -> None:
-    render_shell('首页', '欢迎进入 AI 绘图平台，快速开始你的创作任务。')
+    render_layout('/', '首页', '描述你的想法，快速生成第一张 AI 图片。')
 
 
 @ui.page('/images')
-def image_management_page() -> None:
-    render_shell('图片管理', '集中管理上传图片、素材库和历史生成结果。')
+def image_page() -> None:
+    render_layout('/images', '图片管理', '管理历史生成结果，筛选、预览和归档作品。')
 
 
 @ui.page('/workflow')
-def workflow_editor_page() -> None:
-    render_shell('工作流编辑页面', '通过节点与参数编排你的智能绘图工作流。')
+def workflow_page() -> None:
+    render_layout('/workflow', '工作流编辑页面', '配置模型、参数与节点，打造你的自动化创作流程。')
 
 
 @ui.page('/settings')
 def settings_page() -> None:
-    render_shell('设置页面', '配置模型偏好、系统参数和界面选项。')
+    render_layout('/settings', '设置页面', '调整系统偏好、默认分辨率与生成质量选项。')
 
 
 ui.run(title='AI绘图', port=8080)
